@@ -11,7 +11,7 @@ defmodule PopulatorTest do
     end
 
     # create supervisor, with one random child already
-    {:ok, sup} = TH.Supervisor.start_link children: [child_spec(name: :w2)]
+    {:ok, sup} = TH.Supervisor.start_link children: [child_spec.(name: :w2)]
 
     # create desired_children function for 5 children
     desired_children = fn()->
