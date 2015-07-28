@@ -7,7 +7,9 @@ defmodule PopulatorTest do
   test "population growth" do
     # create child_spec function
     child_spec = fn(data)->
-      Supervisor.Spec.worker(Task, [TH, :lazy_worker, [[ name: data[:name] ]] ])
+      Supervisor.Spec.worker(Task,
+                             [TH, :lazy_worker, [[ name: data[:name] ]] ],
+                             [id: data[:name]])
     end
 
     # create supervisor, with one random child already
@@ -26,7 +28,7 @@ defmodule PopulatorTest do
 
     # check supervisor has the 5 children
     H.wait_for fn ->
-      H.children_names(sup)  == desired_names
+      H.children_names(sup) == desired_names
     end
   end
 

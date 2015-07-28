@@ -141,6 +141,22 @@ defmodule Populator.Helpers do
   end
 
   @doc """
+    Start a children with given spec in the given supervisor if not already started.
+
+    Returns `{:ok, child}` if the child is successfully started or
+    it was already started. `{:error, reason}` otherwise.
+  """
+  def start_child(spec, supervisor) do
+    res = Supervisor.start_child supervisor, spec
+    case res do
+      {:ok, child} -> {:ok, child}
+      {:ok, child, _} -> {:ok, child}
+      {:error, {:already_started, child}} -> {:ok, child}
+      x -> x
+    end
+  end
+
+  @doc """
     Gets an usable string from a binary crypto hash
   """
   def hexdigest(binary) do
