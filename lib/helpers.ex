@@ -117,7 +117,6 @@ defmodule Populator.Helpers do
   #
   defp get_linked_ids(name) do
     res = name |> Process.whereis |> Process.info |> Keyword.get(:links)
-    spit res
     res
   end
 
@@ -127,6 +126,7 @@ defmodule Populator.Helpers do
   #
   defp get_id_and_name(pid, mod \\ nil) do
     pinfo = Process.info(pid)
+    spit pinfo
     id = if mod, do: mod.get_id(pinfo[:registered_name]), else: nil
     { id, pinfo[:registered_name] }
   end
@@ -148,6 +148,7 @@ defmodule Populator.Helpers do
   """
   def start_child(spec, supervisor) do
     res = Supervisor.start_child supervisor, spec
+    spit res
     case res do
       {:ok, child} -> {:ok, child}
       {:ok, child, _} -> {:ok, child}

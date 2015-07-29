@@ -22,13 +22,14 @@ defmodule PopulatorTest do
     desired_names = desired_children.() |> Enum.map &( &1[:name] )
 
     # call Populator.run
-    Populator.run supervisor: sup,
+    Populator.run supervisor: TH.Supervisor,
                   child_spec: child_spec,
                   desired_children: desired_children
+    H.spit 'hey'
 
     # check supervisor has the 5 children
     H.wait_for fn ->
-      H.children_names(sup) == desired_names
+      H.children_names(TH.Supervisor) == desired_names
     end
   end
 

@@ -19,7 +19,7 @@ defmodule Populator.TestHelpers do
 
   def lazy_worker(opts \\ []) do
     if opts[:name], do: Process.register(self,opts[:name])
-    :timer.sleep(0.5)
+    :timer.sleep(50)
     lazy_worker
   end
 
