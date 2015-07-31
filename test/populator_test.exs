@@ -34,6 +34,34 @@ defmodule PopulatorTest do
   end
 
   test "population shrink" do
+    # create child_spec function
+    child_spec = fn(data)->
+      Supervisor.Spec.worker(Task,
+                             [TH, :lazy_worker, [[ name: data[:name] ]] ],
+                             [id: data[:name]])
+    end
+
+    # create supervisor, with some children
+    children = [[name: :w1],[name: :w2],[name: :w3],[name: :w4],[name: :w5]]
+        |> Enum.map(&( child_spec.(&1)))
+    {:ok, sup} = TH.Supervisor.start_link children: children
+
+    # create desired_children function for 2 children
+    desired_children = fn()->
+      [[name: :w3],[name: :w5]]
+    end
+    desired_names = desired_children.() |> Enum.map &( &1[:name] )
+
+    # call Populator.run
+    Populator.run supervisor: TH.Supervisor,
+                  child_spec: child_spec,
+                  desired_children: desired_children
+    H.spit 'hey'
+
+    # check supervisor has the 2 children
+    H.wait_for fn ->
+      H.children_names(TH.Supervisor) == desired_names
+    end
     H.todo
   end
 
