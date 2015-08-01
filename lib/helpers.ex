@@ -149,13 +149,16 @@ defmodule Populator.Helpers do
   def start_child(spec, supervisor) do
     res = Supervisor.start_child supervisor, spec
     spit res
-    case res do
-      {:ok, child} -> {:ok, child}
-      {:ok, child, _} -> {:ok, child}
-      {:error, {:already_started, child}} -> {:ok, child}
-      x -> x
+    case child_is_started_ok(res) do
+      child -> {:ok, child}
+      false -> res
     end
   end
+
+  defp child_is_started_ok({:ok,child}), do: child
+  defp child_is_started_ok({:ok,child,_}), do: child
+  defp child_is_started_ok({:error, {:already_started, child}}), do: child
+  defp child_is_started_ok(_), do: false
 
   @doc """
     Gets an usable string from a binary crypto hash
