@@ -6,11 +6,7 @@ defmodule PopulatorTest do
 
   test "population growth" do
     # create child_spec function
-    child_spec = fn(data)->
-      Supervisor.Spec.worker(Task,
-                             [TH, :lazy_worker, [[ name: data[:name] ]] ],
-                             id: data[:name])
-    end
+    child_spec = get_child_spec_fun
 
     # create supervisor, with one random child already
     {:ok, sup} = TH.Supervisor.start_link children: [child_spec.(name: :w2)]
@@ -45,11 +41,7 @@ defmodule PopulatorTest do
 
   test "population shrink" do
     # create child_spec function
-    child_spec = fn(data)->
-      Supervisor.Spec.worker(Task,
-                             [TH, :lazy_worker, [[ name: data[:name] ]] ],
-                             [id: data[:name]])
-    end
+    child_spec = get_child_spec_fun
 
     # create supervisor, with some children
     children = [[name: :w1],[name: :w2],[name: :w3],[name: :w4],[name: :w5]]
@@ -86,5 +78,14 @@ defmodule PopulatorTest do
 
   test "stationary population" do
     H.todo
+  end
+
+  # create child_spec function
+  defp get_child_spec_fun do
+    fn(data)->
+      Supervisor.Spec.worker(Task,
+                             [TH, :lazy_worker, [[ name: data[:name] ]] ],
+                             [id: data[:name]])
+    end
   end
 end
