@@ -21,7 +21,7 @@ defmodule PopulatorTest do
     end
     desired_names = desired_children.() |> Enum.map &( &1[:name] )
 
-    # call Populator.run
+    # call Populator.run, it should populate with new children
     Populator.run supervisor: TH.Supervisor,
                   child_spec: child_spec,
                   desired_children: desired_children
@@ -30,6 +30,17 @@ defmodule PopulatorTest do
     H.wait_for fn ->
       H.children_names(TH.Supervisor) == desired_names
     end
+
+    # save linked_ids to ensure they are steady
+    linked_ids = H.get_linked_ids TH.Supervisor
+
+    # call Populator.run, nothing should change
+    Populator.run supervisor: TH.Supervisor,
+                  child_spec: child_spec,
+                  desired_children: desired_children
+
+    # check linked_ids are still the same
+    assert linked_ids == H.get_linked_ids(TH.Supervisor)
   end
 
   test "population shrink" do
@@ -51,7 +62,7 @@ defmodule PopulatorTest do
     end
     desired_names = desired_children.() |> Enum.map &( &1[:name] )
 
-    # call Populator.run
+    # call Populator.run, it should kill some children
     Populator.run supervisor: TH.Supervisor,
                   child_spec: child_spec,
                   desired_children: desired_children
@@ -60,6 +71,17 @@ defmodule PopulatorTest do
     H.wait_for fn ->
       H.children_names(TH.Supervisor) == desired_names
     end
+
+    # save linked_ids to ensure they are steady
+    linked_ids = H.get_linked_ids TH.Supervisor
+
+    # call Populator.run, nothing should change
+    Populator.run supervisor: TH.Supervisor,
+                  child_spec: child_spec,
+                  desired_children: desired_children
+
+    # check linked_ids are still the same
+    assert linked_ids == H.get_linked_ids(TH.Supervisor)
   end
 
   test "stationary population" do

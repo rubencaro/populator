@@ -92,9 +92,10 @@ defmodule Populator.Helpers do
       |> Enum.sort
   end
 
-  # Get linked pids list, useful to guess supervisor children without blocking it.
-  #
-  defp get_linked_ids(name) do
+  @doc """
+    Get linked pids list, useful to guess supervisor children without blocking it.
+  """
+  def get_linked_ids(name) do
     res = name |> Process.whereis |> Process.info |> Keyword.get(:links)
     res
   end
