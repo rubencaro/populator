@@ -1,5 +1,7 @@
 # Populator
 
+[![Build Status](https://travis-ci.org/rubencaro/populator.svg?branch=master)](https://travis-ci.org/rubencaro/populator)
+
 A library to help control the population of a given supervisor.
 
 It takes some params, such as the function to get new child specs, or the function to get the list of desired children, and it spawns (or kills) children on the given supervisor as necessary.
