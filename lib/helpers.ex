@@ -133,28 +133,24 @@ defmodule Populator.Helpers do
   defp child_is_started_ok(_), do: false
 
   @doc """
-    Gets an usable string from a binary crypto hash
+    Raise an error if any given key is not in the given Keyword.
+    Returns given Keyword, so it can be chained using pipes.
   """
-  def hexdigest(binary) do
-    for b <- :erlang.binary_to_list(binary), do: :io_lib.format("~2.16.0B", [b])
-      |> List.flatten |> :string.to_lower |> List.to_string
-  end
-
-  @doc """
-    Gets an md5 string
-  """
-  def md5(binary), do: :crypto.hash(:md5, binary) |> hexdigest
-
-  @doc """
-    Get timestamp in seconds, microseconds, or nanoseconds
-  """
-  def ts(scale \\ :seconds) do
-    {mega, sec, micro} = :os.timestamp
-    t = mega * 1_000_000 + sec
-    case scale do
-      :seconds -> t
-      :micro -> t * 1_000_000 + micro
-      :nano -> (t * 1_000_000 + micro) * 1_000
+  def requires(args, required) do
+    keys = args |> Keyword.keys
+    for r <- required do
+      if not r in keys do
+        raise ArgumentError, message: "Required argument '#{r}' was not present in #{inspect(args)}"
+      end
     end
+    args # chainable
   end
+
+  @doc """
+    Apply given defaults to given Keyword. Returns merged Keyword.
+  """
+  def defaults(args, defs) do
+    defs |> Keyword.merge(args)
+  end
+
 end
