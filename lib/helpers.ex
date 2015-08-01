@@ -84,7 +84,7 @@ defmodule Populator.Helpers do
     Gets names for children in given supervisor. Children with no registered
     name are not returned. List is sorted. Options al passed to `children_data/2`.
   """
-  def children_names(supervisor, opts \\ []) do
+  def children_names(supervisor) do
     supervisor
       |> get_linked_ids
       |> Enum.map( &( get_name(&1) ) )
@@ -122,8 +122,8 @@ defmodule Populator.Helpers do
   def start_child(spec, supervisor) do
     res = Supervisor.start_child supervisor, spec
     case child_is_started_ok(res) do
-      child -> {:ok, child}
       false -> res
+      child -> {:ok, child}
     end
   end
 
