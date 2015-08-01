@@ -12,9 +12,6 @@ Every given `step` secs, or after receiving some specific message, `Populator` w
 
 ## TODOs
 
-* Testing
-* Initial implementation
-* Add to travis
 * Documentation & examples
 * Accept anonymous children
 * Add to hex
