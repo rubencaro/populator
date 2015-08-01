@@ -24,23 +24,17 @@ defmodule Populator do
 
     # start all desired children
     for d <- desired do
-      H.spit spec_fun.(d)
       {:ok, child} = spec_fun.(d) |> H.start_child(sup)
     end
 
     # kill non desired ones
     desired_names = desired |> Enum.map(&( &1[:name] )) |> Enum.sort
 
-    H.spit desired_names
-
-    H.spit( sup |> H.children_names(all: true) )
-
     sup
     |> H.children_names
     |> Enum.filter(&( not(&1 in desired_names) ))
     |> Enum.map(&( Process.whereis(&1) ))
     |> Enum.each(&( true = Process.exit(&1, :kill) ))
-
 
     :ok
   end

@@ -28,6 +28,8 @@ defmodule Populator.Helpers do
       # chain = chain ++ [:yellow, "\n\n#{inspect Process.info(self)}"]
 
       (chain ++ ["\n\n", :reset]) |> IO.ANSI.format(true) |> IO.puts
+
+      unquote(obj)
     end
   end
 
@@ -84,32 +86,9 @@ defmodule Populator.Helpers do
   """
   def children_names(supervisor, opts \\ []) do
     supervisor
-      |> children_data(opts)
-      |> Enum.map( fn({_, name})-> name end )
-      |> Enum.sort
-  end
-
-  @doc """
-    Gets ids for children in given supervisor. Children with no registered
-    name are not returned. List is sorted. Options al passed to `children_data/2`.
-  """
-  def children_ids(supervisor, opts \\ []) do
-    supervisor
-      |> children_data(opts)
-      |> Enum.map( fn({id, _})-> id end )
-      |> Enum.sort
-  end
-
-  @doc """
-    Gets ids and names (if they are registered) for children in given supervisor.
-    List is sorted. Any unrecognised children (by name) are filtered out, if no
-    trueth `:all` option is given.
-  """
-  def children_data(supervisor, opts \\ []) do
-    supervisor
       |> get_linked_ids
-      |> Enum.map( &( get_id_and_name(&1) ) )
-      |> Enum.filter(fn({id,_})-> id || opts[:all] end)
+      |> Enum.map( &( get_name(&1) ) )
+      |> Enum.filter( &(&1) ) # remove nils
       |> Enum.sort
   end
 
@@ -120,15 +99,8 @@ defmodule Populator.Helpers do
     res
   end
 
-  # Returns `{id,name}` for the given pid.
-  # `id` is based on the registered name of the process, and it may be `nil` if
-  # the process is not a managed child.
-  #
-  defp get_id_and_name(pid, mod \\ nil) do
-    pinfo = Process.info(pid)
-    spit pinfo
-    id = if mod, do: mod.get_id(pinfo[:registered_name]), else: nil
-    { id, pinfo[:registered_name] }
+  defp get_name(pid) do
+    Process.info(pid) |> Keyword.get :registered_name, nil
   end
 
   @doc """
@@ -148,7 +120,6 @@ defmodule Populator.Helpers do
   """
   def start_child(spec, supervisor) do
     res = Supervisor.start_child supervisor, spec
-    spit res
     case child_is_started_ok(res) do
       child -> {:ok, child}
       false -> res

@@ -9,7 +9,7 @@ defmodule PopulatorTest do
     child_spec = fn(data)->
       Supervisor.Spec.worker(Task,
                              [TH, :lazy_worker, [[ name: data[:name] ]] ],
-                             [id: data[:name]])
+                             id: data[:name])
     end
 
     # create supervisor, with one random child already
@@ -25,7 +25,6 @@ defmodule PopulatorTest do
     Populator.run supervisor: TH.Supervisor,
                   child_spec: child_spec,
                   desired_children: desired_children
-    H.spit 'hey'
 
     # check supervisor has the 5 children
     H.wait_for fn ->
@@ -56,13 +55,11 @@ defmodule PopulatorTest do
     Populator.run supervisor: TH.Supervisor,
                   child_spec: child_spec,
                   desired_children: desired_children
-    H.spit 'hey'
 
     # check supervisor has the 2 children
     H.wait_for fn ->
       H.children_names(TH.Supervisor) == desired_names
     end
-    H.todo
   end
 
   test "stationary population" do
