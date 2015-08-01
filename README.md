@@ -14,6 +14,8 @@ Every given `step` secs, or after receiving some specific message, `Populator` w
 
 ## TODOs
 
+* Add loop runner
+* Add message runner
 * Documentation & examples
 * Accept anonymous children
 * Add to hex
