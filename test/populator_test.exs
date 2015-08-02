@@ -106,20 +106,24 @@ defmodule PopulatorTest do
   test "loop runner" do
     # place mocks, we are only testing the runner
     :meck.new(Populator)
-    :meck.expect(Populator, :run, fn(args) ->
+    :meck.expect(Populator, :run, fn(args)->
       # check good looking args
       args |> H.requires([:supervisor,:child_spec,:desired_children])
       :ok
     end)
+    :meck.expect(Populator, :looper, fn(args)-> :meck.passthrough([args]) end)
 
     # args meant to be passed to :run
     run_args = [supervisor: :sup, child_spec: :spec, desired_children: :desired]
 
-    assert :ok = Populator.run(run_args)
+    # spawn the loop runner, let it loop 5 times
+    args = run_args |> Keyword.merge step: 1, max_loops: 5
+    assert :ok = Populator.looper(args)
 
-    assert :meck.num_calls(Populator, :run, [run_args]) == 1
-
-    H.todo
+    # check everything went as expected
+    H.wait_for fn ->
+      :meck.num_calls(Populator, :run, [run_args]) == 5
+    end
   end
 
   # get child_spec_fun and desired_children_fun for growth test
