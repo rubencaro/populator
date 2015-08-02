@@ -8,6 +8,10 @@ defmodule PopulatorTest do
     # kill test supervisor if it's alive
     pid = TH.Supervisor |> Process.whereis
     if pid, do: true = Process.exit(pid,:kill)
+
+    # clean any mock on exit
+    on_exit fn -> :meck.unload end
+
     :ok
   end
 
@@ -97,6 +101,25 @@ defmodule PopulatorTest do
 
     # check linked_ids are still the same
     assert linked_ids == H.get_linked_ids(TH.Supervisor)
+  end
+
+  test "loop runner" do
+    # place mocks, we are only testing the runner
+    :meck.new(Populator)
+    :meck.expect(Populator, :run, fn(args) ->
+      # check good looking args
+      args |> H.requires([:supervisor,:child_spec,:desired_children])
+      :ok
+    end)
+
+    # args meant to be passed to :run
+    run_args = [supervisor: :sup, child_spec: :spec, desired_children: :desired]
+
+    assert :ok = Populator.run(run_args)
+
+    assert :meck.num_calls(Populator, :run, [run_args]) == 1
+
+    H.todo
   end
 
   # get child_spec_fun and desired_children_fun for growth test
