@@ -121,7 +121,7 @@ defmodule PopulatorTest do
     # args expected by Populator.run
     run_args = [:sup, :spec, :desired]
 
-    # spawn the loop runner, let it loop 5 times
+    # spawn the receiver
     args = [name: :test_receiver, run_args: run_args]
     Task.async fn-> Populator.Receiver.run(args) end
 
