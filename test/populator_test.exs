@@ -109,7 +109,7 @@ defmodule PopulatorTest do
 
     # check everything went as expected
     H.wait_for fn ->
-      :meck.num_calls(Populator, :run, [run_args]) == 5
+      :meck.num_calls(Populator, :run, run_args) == 5
     end
   end
 
@@ -135,7 +135,7 @@ defmodule PopulatorTest do
 
     # check everything went as expected
     H.wait_for fn ->
-      :meck.num_calls(Populator, :run, [run_args]) == 1
+      :meck.num_calls(Populator, :run, run_args) == 1
     end
   end
 
