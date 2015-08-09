@@ -24,9 +24,7 @@ defmodule PopulatorTest do
     {:ok, _} = TH.Supervisor.start_link children: [child_spec.(name: :w2)]
 
     # call Populator.run, it should populate with new children
-    Populator.run supervisor: TH.Supervisor,
-                  child_spec: child_spec,
-                  desired_children: desired_children
+    :ok = Populator.run TH.Supervisor, child_spec, desired_children
 
     # check supervisor has the 5 children
     H.wait_for fn ->
@@ -37,9 +35,7 @@ defmodule PopulatorTest do
     linked_ids = H.get_linked_ids TH.Supervisor
 
     # call Populator.run, nothing should change
-    :ok = Populator.run supervisor: TH.Supervisor,
-                        child_spec: child_spec,
-                        desired_children: desired_children
+    :ok = Populator.run TH.Supervisor, child_spec, desired_children
 
     # check linked_ids are still the same
     assert linked_ids == H.get_linked_ids(TH.Supervisor)
@@ -61,9 +57,7 @@ defmodule PopulatorTest do
     desired_names = desired_children.() |> Enum.map &( &1[:name] )
 
     # call Populator.run, it should kill some children
-    :ok = Populator.run supervisor: TH.Supervisor,
-                        child_spec: child_spec,
-                        desired_children: desired_children
+    :ok = Populator.run TH.Supervisor, child_spec, desired_children
 
     # check supervisor has the 2 children
     H.wait_for fn ->
@@ -74,9 +68,7 @@ defmodule PopulatorTest do
     linked_ids = H.get_linked_ids TH.Supervisor
 
     # call Populator.run, nothing should change
-    Populator.run supervisor: TH.Supervisor,
-                  child_spec: child_spec,
-                  desired_children: desired_children
+    :ok = Populator.run TH.Supervisor, child_spec, desired_children
 
     # check linked_ids are still the same
     assert linked_ids == H.get_linked_ids(TH.Supervisor)
@@ -94,9 +86,9 @@ defmodule PopulatorTest do
 
     # call Populator.run, it should do nothing, even if funs say it should grow
     # that's because we passed the `stationary` param
-    :stationary = Populator.run supervisor: TH.Supervisor,
-                                child_spec: child_spec,
-                                desired_children: desired_children,
+    :stationary = Populator.run TH.Supervisor,
+                                child_spec,
+                                desired_children,
                                 stationary: true
 
     # check linked_ids are still the same
@@ -106,14 +98,10 @@ defmodule PopulatorTest do
   test "loop runner" do
     # place mocks, we are only testing the runner
     :meck.new(Populator)
-    :meck.expect(Populator, :run, fn(args)->
-      # check good looking args
-      args |> H.requires([:supervisor,:child_spec,:desired_children])
-      :ok
-    end)
+    :meck.expect(Populator, :run, fn(_, _, _)-> :ok end)
 
     # args expected by Populator.run
-    run_args = [supervisor: :sup, child_spec: :spec, desired_children: :desired]
+    run_args = [:sup, :spec, :desired]
 
     # spawn the loop runner, let it loop 5 times
     args = [step: 1, max_loops: 5, name: :test_looper, run_args: run_args]
@@ -128,14 +116,10 @@ defmodule PopulatorTest do
   test "message runner" do
     # place mocks, we are only testing the runner
     :meck.new(Populator)
-    :meck.expect(Populator, :run, fn(args)->
-      # check good looking args
-      args |> H.requires([:supervisor,:child_spec,:desired_children])
-      :ok
-    end)
+    :meck.expect(Populator, :run, fn(_, _, _)-> :ok end)
 
     # args expected by Populator.run
-    run_args = [supervisor: :sup, child_spec: :spec, desired_children: :desired]
+    run_args = [:sup, :spec, :desired]
 
     # spawn the loop runner, let it loop 5 times
     args = [name: :test_receiver, run_args: run_args]

@@ -22,7 +22,7 @@ defmodule Populator.Looper do
 
   defp do_loop(args, left) do
     # actual run
-    :ok = Populator.run args[:run_args]
+    :ok = apply(Populator, :run, args[:run_args])
 
     # only stop here, negative values mean infinite loop
     if left == 1 do

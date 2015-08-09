@@ -20,7 +20,7 @@ defmodule Populator.Receiver do
   defp do_receive(args) do
     receive do
       :populate ->
-        :ok = Populator.run args[:run_args]
+        :ok = apply(Populator, :run, args[:run_args])
         do_receive args
     end
   end
