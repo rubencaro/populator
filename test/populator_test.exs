@@ -125,6 +125,36 @@ defmodule PopulatorTest do
     end
   end
 
+  test "message runner" do
+    # place mocks, we are only testing the runner
+    :meck.new(Populator)
+    :meck.expect(Populator, :run, fn(args)->
+      # check good looking args
+      args |> H.requires([:supervisor,:child_spec,:desired_children])
+      :ok
+    end)
+
+    # args expected by Populator.run
+    run_args = [supervisor: :sup, child_spec: :spec, desired_children: :desired]
+
+    # spawn the loop runner, let it loop 5 times
+    args = [name: :test_receiver, run_args: run_args]
+    Task.async fn-> Populator.Receiver.run(args) end
+
+    assert :meck.num_calls(Populator, :run, [run_args]) == 0
+
+    # wait for the name to be registered
+    H.wait_for fn -> Process.whereis(:test_receiver) end
+
+    # send the `:populate` message
+    send :test_receiver, :populate
+
+    # check everything went as expected
+    H.wait_for fn ->
+      :meck.num_calls(Populator, :run, [run_args]) == 1
+    end
+  end
+
   # get child_spec_fun and desired_children_fun for growth test
   defp get_growth_funs do
     # create desired_children function for 5 children
