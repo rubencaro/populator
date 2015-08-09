@@ -111,14 +111,13 @@ defmodule PopulatorTest do
       args |> H.requires([:supervisor,:child_spec,:desired_children])
       :ok
     end)
-    :meck.expect(Populator, :looper, fn(args)-> :meck.passthrough([args]) end)
 
-    # args meant to be passed to :run
+    # args expected by Populator.run
     run_args = [supervisor: :sup, child_spec: :spec, desired_children: :desired]
 
     # spawn the loop runner, let it loop 5 times
-    args = run_args |> Keyword.merge step: 1, max_loops: 5
-    assert :ok = Populator.looper(args)
+    args = [step: 1, max_loops: 5, name: :test_looper, run_args: run_args]
+    assert :ok = Populator.Looper.run(args)
 
     # check everything went as expected
     H.wait_for fn ->

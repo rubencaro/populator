@@ -2,8 +2,6 @@ require Populator.Helpers, as: H
 
 defmodule Populator do
 
-  @required_to_run [:supervisor,:child_spec,:desired_children]
-
   @doc """
     It will update the given supervisor until it has the population demanded by
     `desired_children`, either by creating new children or by killing existing
@@ -20,7 +18,7 @@ defmodule Populator do
   """
   def run(args) do
     args = args
-      |> H.requires(@required_to_run)
+      |> H.requires([:supervisor,:child_spec,:desired_children])
       |> H.defaults(stationary: false)
 
     if args[:stationary], do: :stationary, else: populate(args)
@@ -46,18 +44,20 @@ defmodule Populator do
 
     :ok
   end
+end
+
+defmodule Populator.Looper do
 
   @doc """
     To be added to a supervisor hierarchy wrapped in a `Task`, like this:
     ```elixir
-    worker(Task, [Populator,:looper,[args]])
+    worker(Task, [Populator.Looper,:run,[args]])
     ```
 
     `max_loops` below zero implies forever loop
   """
-  def looper(args) do
+  def run(args) do
     args = args
-      |> H.requires(@required_to_run) # check before starting the loop
       |> H.defaults(step: 30000, max_loops: -1)
 
     # register the name if asked
@@ -68,14 +68,15 @@ defmodule Populator do
 
   defp do_loop(args, left) do
     # actual run
-    :ok = run args
+    :ok = Populator.run args[:run_args]
 
-    # only sleep & loop if any loops left
-    if left > 0 do 
+    # only stop here, negative values mean infinite loop
+    if left == 1 do
+      :ok
+    else
+      # only sleep & loop if any loops left
       :timer.sleep(args[:step])
       do_loop(args, left - 1)
-    else
-      :ok
     end
   end
 
