@@ -15,8 +15,22 @@ defmodule Populator do
     The `desired_children` function should return a list of children data,
     with all the state needed by the `child_spec` function for each of them.
     It should include a `:name` with the unique name for each child.
+
+    `:ok` will be returned.
+
+    * `supervisor` is the supervisor name
+    * `child_spec` is a function returning a children spec given its child data
+    * `desired_children` is a function returning a list with data for each child
+    * `stationary` can be given to avoid the actual execution, useful on testing
+      environments, for example. `:stationary` will be returned.
+
+    See README.md for further details.
   """
-  def run(supervisor, child_spec, desired_children, opts \\ []) do
+  def run(supervisor, child_spec, desired_children, opts \\ [])
+      when is_atom(supervisor)
+      and is_function(child_spec,1)
+      and is_function(desired_children,0) do
+
     if opts[:stationary], do: :stationary,
       else: populate(supervisor, child_spec, desired_children)
   end

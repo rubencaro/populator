@@ -89,7 +89,11 @@ Task.async fn-> Populator.Looper.run(args) end
 # `MySupervisor` children pool will be adapted every 30sec.
 ```
 
-Usually you may want the looper `Task` to be in your supervision tree.
+Usually you may want the looper `Task` to be in your supervision tree, like this:
+
+```elixir
+worker(Task, [Populator.Looper,:run,[args]])
+```
 
 ## `Populator.Receiver`
 
@@ -107,7 +111,11 @@ Task.async fn-> Populator.Receiver.run(args) end
 send :my_receiver, :populate
 ```
 
-Usually you may want the receiver `Task` to be in your supervision tree.
+Usually you may want the receiver `Task` to be in your supervision tree, like this:
+
+```elixir
+worker(Task, [Populator.Receiver,:run,[args]])
+```
 
 ## TODOs
 
