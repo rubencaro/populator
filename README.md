@@ -1,6 +1,7 @@
 # Populator
 
 [![Build Status](https://travis-ci.org/rubencaro/populator.svg?branch=master)](https://travis-ci.org/rubencaro/populator)
+[![Hex Version](http://img.shields.io/hexpm/v/populator.svg?style=flat)](https://hex.pm/packages/populator)
 
 A library to help control the population of a given supervisor.
 
@@ -119,7 +120,6 @@ worker(Task, [Populator.Receiver,:run,[args]])
 
 ## TODOs
 
-* Add to hex
 * Get it stable on production (then get to 1.0)
 * Accept anonymous supervisor
 * Accept anonymous children

@@ -3,19 +3,20 @@ defmodule Populator.Mixfile do
 
   def project do
     [app: :populator,
-     version: "0.0.1",
+     version: "0.2.0",
      elixir: "~> 1.0",
-     deps: deps]
-  end
-
-  # Configuration for the OTP application
-  #
-  # Type `mix help compile.app` for more information
-  def application do
-    [applications: [:logger]]
+     package: package,
+     deps: deps,
+     description: "Supervisor population control library"]
   end
 
   defp deps do
     [ {:meck, "~> 0.8.3", only: [:dev,:test]} ]
+  end
+
+  defp package do
+    [contributors: ["Rubén Caro"],
+     licenses: ["MIT"],
+     links: %{github: "https://github.com/rubencaro/populator"}]
   end
 end

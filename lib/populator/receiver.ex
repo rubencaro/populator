@@ -1,5 +1,3 @@
-require Populator.Helpers, as: H
-
 defmodule Populator.Receiver do
 
   @doc """
