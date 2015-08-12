@@ -5,11 +5,17 @@
 
 A library to help control the population of a given supervisor.
 
+Just add it among your project dependencies on `mix.exs`:
+
+```elixir
+{:populator, "0.2.0"}
+```
+
 ## What
 
 It takes the name of the supervisor and some params, such as the function to get new child specs, or the function to get the list of desired children, and it spawns (or kills) children on the given supervisor as necessary.
 
-The `child_spec` function should end with a call to `Supervisor.Spec.worker/3`. Populator will use that spec to add every new children to the supervisor tree.
+The `child_spec` function should end with a call to `Supervisor.Spec.worker/3` or to `Supervisor.Spec.supervisor/3`. Populator will use that spec to add every new children to the supervisor tree.
 
 The `desired_children` function should return a list of children data, with all the state needed by the `child_spec` function for each of them.
 
@@ -51,7 +57,7 @@ Thus when the list of workers returned by the database changes, then `Populator`
 
 ## `child_spec` function
 
-The `child_spec` function is given a member of the list returned by the `desired_children` function, and returns the children specification for the corresponding child. This usually means just a call to `Supervisor.Spec.worker/3`.
+The `child_spec` function is given a member of the list returned by the `desired_children` function, and returns the children specification for the corresponding child. This usually means just a call to `Supervisor.Spec.worker/3` or `Supervisor.Spec.supervisor/3`.
 
 For example, this `child_spec` function returns the children specification that wraps some `MyModule.worker_fun/1` in a `Task` and adds it to the supervisor using its unique `:name` as id:
 
