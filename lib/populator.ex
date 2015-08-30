@@ -48,7 +48,7 @@ defmodule Populator do
     # kill non desired ones
     desired_names = desired |> Enum.map(&( &1[:name] )) |> Enum.sort
 
-		supervisor
+    supervisor
     |> H.children_names
     |> Enum.filter(&( not(&1 in desired_names) ))
     |> Enum.each(fn (x) -> supervisor |> Supervisor.terminate_child(x); supervisor |> Supervisor.delete_child(x) end)
