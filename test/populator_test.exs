@@ -46,9 +46,17 @@ defmodule PopulatorTest do
     child_spec = get_child_spec_fun
 
     # create supervisor, with some children
-    children = [[name: :w1],[name: :w2],[name: :w3],[name: :w4],[name: :w5]]
-        |> Enum.map(&( child_spec.(&1)))
-    {:ok, _} = TH.Supervisor.start_link children: children
+    initial_children_list  = [[name: :w1],[name: :w2],[name: :w3],[name: :w4],[name: :w5]]
+		initial_children_spec  = initial_children_list |> Enum.map(&( child_spec.(&1)))
+		initial_children_names = initial_children_list |> Enum.map &( &1[:name] )
+		{:ok, _} = TH.Supervisor.start_link children: initial_children_spec
+
+    # check supervisor has the 5 children
+    H.wait_for fn ->
+      H.children_names(TH.Supervisor) == initial_children_names
+    end
+
+		assert H.children_names(TH.Supervisor) == initial_children_names
 
     # create desired_children function for 2 children
     desired_children = fn(_sup_name)->
@@ -63,6 +71,8 @@ defmodule PopulatorTest do
     H.wait_for fn ->
       H.children_names(TH.Supervisor) == desired_names
     end
+
+    assert H.children_names(TH.Supervisor) == desired_names
 
     # save linked_ids to ensure they are steady
     linked_ids = H.get_linked_ids TH.Supervisor
@@ -154,7 +164,7 @@ defmodule PopulatorTest do
     fn(data)->
       Supervisor.Spec.worker(Task,
                              [TH, :lazy_worker, [[ name: data[:name] ]] ],
-                             [id: data[:name]])
+                             [id: data[:name], restart: :temporary])
     end
   end
 end
