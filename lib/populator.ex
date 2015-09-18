@@ -35,32 +35,6 @@ defmodule Populator do
       else: populate(supervisor, child_spec, desired_children, opts)
   end
 
-  @doc """
-    This function has the same behaviour as run/4 but it builds the child_list
-    spect from this parameters:
-
-    * `child_spec` is a function returning the children spec. It recives
-      [name: name] and opts, the former being the desired children name,
-      the later being the worker params.
-    * `child_list` is actual process configuracion. It has the follwing structure:
-
-        child_list = [
-          [[name: :a], [value1: :v1a, value2: :v2a]],
-          [[name: :b], [value1: :v1b, value2: :v2b]]
-        ]
-
-    * `stationary` can be given to avoid the actual execution, useful on testing
-      environments, for example. `:stationary` will be returned.
-  """
-  def run_from_child_list(supervisor, child_spec, child_list, opts \\ [])
-    when is_atom(supervisor)
-    and is_function(child_spec, 2) do
-
-    if opts[:stationary], do: :stationary,
-      else: populate_from_child_list(supervisor, child_spec, child_list)
-
-  end
-
   # Actually perform population operations
   #
   defp populate(supervisor, child_spec, desired_children, opts) do
@@ -69,27 +43,6 @@ defmodule Populator do
 
     for d <- desired do
       {:ok, _} = child_spec.(d, opts) |> H.start_child(supervisor)
-    end
-
-    # kill non desired ones
-    desired_names = desired |> Enum.map(&( &1[:name] )) |> Enum.sort
-
-    supervisor
-    |> H.children_names
-    |> Enum.filter(&( not(&1 in desired_names) ))
-    |> Enum.each(fn (x) -> supervisor |> Supervisor.terminate_child(x); supervisor |> Supervisor.delete_child(x) end)
-
-    :ok
-  end
-
-  # Perform population operations from a child list
-  defp populate_from_child_list(supervisor, child_spec, child_list, opts \\ []) do
-    # start all desired children
-    desired = for [name, _] <- child_list, do: name
-    desired_params = for [name, params] <- child_list, do: [name, params]
-
-    for [d, p] <- desired_params do
-      {:ok, _} = child_spec.(d, p) |> H.start_child(supervisor)
     end
 
     # kill non desired ones

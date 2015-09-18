@@ -149,72 +149,6 @@ defmodule PopulatorTest do
     end
   end
 
-  test "Populator from child list" do
-
-    # Build a list of children with its parameters
-    child_list = [
-      [[name: :a], [value1: :v1a, value2: :v2a]],
-      [[name: :b], [value1: :v1b, value2: :v2b]]
-    ]
-
-    {:ok, _} = TH.Supervisor.start_link children: []
-
-    # The task to do
-    child_spec = get_child_spec_fun_for_child_list(self)
-
-    :ok = Populator.run_from_child_list TH.Supervisor, child_spec, child_list
-
-    # Wait for the two children
-    H.wait_for fn ->
-      H.children_names(TH.Supervisor) == [:a, :b]
-    end
-
-    # Check the children received and sent the right values
-    1..2 |> Enum.each fn(_) ->
-      ret = receive do
-        {:a, :v1a, :v2a} -> :ok
-        {:b, :v1b, :v2b} -> :ok
-      end
-
-      assert ret == :ok
-    end
-  end
-
-  test "Populator from child list (shrinks)" do
-
-    child_spec = get_child_spec_fun
-    initial_children_list  = [[name: :w1],[name: :w2],[name: :w3],[name: :w4],[name: :w5]]
-    initial_children_spec  = initial_children_list |> Enum.map(&( child_spec.(&1, opts: [])))
-
-    {:ok, _} = TH.Supervisor.start_link children: initial_children_spec
-
-    # Build a list of children with its parameters
-    child_list = [
-      [[name: :a], [value1: :v1a, value2: :v2a]],
-      [[name: :b], [value1: :v1b, value2: :v2b]]
-    ]
-
-    # The task to do
-    child_spec = get_child_spec_fun_for_child_list(self)
-
-    :ok = Populator.run_from_child_list TH.Supervisor, child_spec, child_list
-
-    # Wait for the two children
-    H.wait_for fn ->
-      H.children_names(TH.Supervisor) == [:a, :b]
-    end
-
-    # Check the children received and sent the right values
-    1..2 |> Enum.each fn(_) ->
-      ret = receive do
-        {:a, :v1a, :v2a} -> :ok
-        {:b, :v1b, :v2b} -> :ok
-      end
-
-      assert ret == :ok
-    end
-  end
-
   # get child_spec_fun and desired_children_fun for growth test
   defp get_growth_funs do
     # create desired_children function for 5 children
@@ -231,24 +165,6 @@ defmodule PopulatorTest do
       Supervisor.Spec.worker(Task,
                              [TH, :lazy_worker, [[ name: data[:name] ]] ],
                              [id: data[:name], restart: :temporary])
-    end
-  end
-
-  defp get_child_spec_fun_for_child_list(parent) do
-    fn([name: name], opts) ->
-      task = fn ->
-
-        # Very imporant when working with populator
-        Process.register self, name
-
-        # Send the received values to the parent
-        send parent, {name, opts[:value1], opts[:value2]}
-
-        # This sleep is need by the wait_for call (see below)
-        :timer.sleep 2000
-      end
-
-      Supervisor.Spec.worker(Task, [task], [name: name, id: name, restart: :temporary])
     end
   end
 end
