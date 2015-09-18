@@ -32,14 +32,14 @@ defmodule Populator do
       and is_function(desired_children,1) do
 
     if opts[:stationary], do: :stationary,
-      else: populate(supervisor, child_spec, desired_children)
+      else: populate(supervisor, child_spec, desired_children, opts)
   end
 
   # Actually perform population operations
   #
-  defp populate(supervisor, child_spec, desired_children) do
+  defp populate(supervisor, child_spec, desired_children, opts) do
     # start all desired children
-    desired = desired_children.(supervisor)
+    desired = desired_children.(opts)
 
     for d <- desired do
       {:ok, _} = child_spec.(d) |> H.start_child(supervisor)

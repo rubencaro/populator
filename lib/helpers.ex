@@ -85,7 +85,11 @@ defmodule Populator.Helpers do
     name are not returned. List is sorted. Options al passed to `children_data/2`.
   """
   def children_names(supervisor) do
-    supervisor |> Supervisor.which_children |> Enum.map(fn (x) -> {name, _, _, _} = x; name end) |> Enum.sort
+    supervisor
+      |> get_linked_ids
+      |> Enum.map( &( get_name(&1) ) )
+      |> Enum.filter( &(&1) ) # remove nils
+      |> Enum.sort
   end
 
   @doc """
