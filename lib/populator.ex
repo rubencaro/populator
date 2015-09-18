@@ -28,7 +28,7 @@ defmodule Populator do
   """
   def run(supervisor, child_spec, desired_children, opts \\ [])
       when is_atom(supervisor)
-      and is_function(child_spec,1)
+      and is_function(child_spec,2)
       and is_function(desired_children,1) do
 
     if opts[:stationary], do: :stationary,
@@ -42,7 +42,7 @@ defmodule Populator do
     desired = desired_children.(opts)
 
     for d <- desired do
-      {:ok, _} = child_spec.(d) |> H.start_child(supervisor)
+      {:ok, _} = child_spec.(d, opts) |> H.start_child(supervisor)
     end
 
     # kill non desired ones
@@ -52,7 +52,7 @@ defmodule Populator do
     |> H.children_names
     |> Enum.filter(&( not(&1 in desired_names) ))
     |> Enum.each(fn (x) -> supervisor |> Supervisor.terminate_child(x); supervisor |> Supervisor.delete_child(x) end)
-		
+
     :ok
   end
 end
