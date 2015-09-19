@@ -101,7 +101,7 @@ defmodule Populator.Helpers do
   end
 
   defp get_name(pid) do
-    Process.info(pid) |> Keyword.get :registered_name, nil
+    (Process.info(pid) || [])|> Keyword.get :registered_name, nil
   end
 
   @doc """
