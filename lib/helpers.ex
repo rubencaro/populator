@@ -120,6 +120,11 @@ defmodule Populator.Helpers do
     it was already started. `{:error, reason}` otherwise.
   """
   def start_child(spec, supervisor) do
+    # Remove the child spec. We need the child_id
+    {child_id, _, _, _, _, _} = spec
+    # Ignore the result (it's error the first time)
+    Supervisor.delete_child supervisor, child_id
+
     res = Supervisor.start_child supervisor, spec
     case child_is_started_ok(res) do
       false -> res
