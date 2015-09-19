@@ -121,7 +121,7 @@ defmodule Populator.Helpers do
   """
   def start_child(spec, supervisor) do
     # Remove the child spec. We need the child_id
-    {child_id, _, _, _, _, _} = spec
+    child_id = elem(spec, 0)
     # Ignore the result (it's error the first time)
     Supervisor.delete_child supervisor, child_id
 
