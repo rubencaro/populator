@@ -18,10 +18,10 @@ defmodule PopulatorTest do
   test "population growth" do
     # get funs
     {child_spec, desired_children} = get_growth_funs
-    desired_names = desired_children.() |> Enum.map &( &1[:name] )
+    desired_names = desired_children.(desired_conf_id: :dummy) |> Enum.map &( &1[:name] )
 
     # create supervisor, with one random child already
-    {:ok, _} = TH.Supervisor.start_link children: [child_spec.(name: :w2)]
+    {:ok, _} = TH.Supervisor.start_link children: [child_spec.([name: :w2], opts: [])]
 
     # call Populator.run, it should populate with new children
     :ok = Populator.run TH.Supervisor, child_spec, desired_children
@@ -46,15 +46,23 @@ defmodule PopulatorTest do
     child_spec = get_child_spec_fun
 
     # create supervisor, with some children
-    children = [[name: :w1],[name: :w2],[name: :w3],[name: :w4],[name: :w5]]
-        |> Enum.map(&( child_spec.(&1)))
-    {:ok, _} = TH.Supervisor.start_link children: children
+    initial_children_list  = [[name: :w1],[name: :w2],[name: :w3],[name: :w4],[name: :w5]]
+    initial_children_spec  = initial_children_list |> Enum.map(&( child_spec.(&1, opts: [])))
+    initial_children_names = initial_children_list |> Enum.map &( &1[:name] )
+    {:ok, _} = TH.Supervisor.start_link children: initial_children_spec
+
+    # check supervisor has the 5 children
+    H.wait_for fn ->
+      H.children_names(TH.Supervisor) == initial_children_names
+    end
+
+    assert H.children_names(TH.Supervisor) == initial_children_names
 
     # create desired_children function for 2 children
-    desired_children = fn()->
+    desired_children = fn(_sup_name)->
       [[name: :w3],[name: :w5]]
     end
-    desired_names = desired_children.() |> Enum.map &( &1[:name] )
+    desired_names = desired_children.(desired_conf_id: :dummy) |> Enum.map &( &1[:name] )
 
     # call Populator.run, it should kill some children
     :ok = Populator.run TH.Supervisor, child_spec, desired_children
@@ -63,6 +71,8 @@ defmodule PopulatorTest do
     H.wait_for fn ->
       H.children_names(TH.Supervisor) == desired_names
     end
+
+    assert H.children_names(TH.Supervisor) == desired_names
 
     # save linked_ids to ensure they are steady
     linked_ids = H.get_linked_ids TH.Supervisor
@@ -79,7 +89,7 @@ defmodule PopulatorTest do
     {child_spec, desired_children} = get_growth_funs
 
     # create supervisor, with one random child already
-    {:ok, _} = TH.Supervisor.start_link children: [child_spec.(name: :w2)]
+    {:ok, _} = TH.Supervisor.start_link children: [child_spec.([name: :w2], opts: [])]
 
     # save linked_ids to ensure they are steady
     linked_ids = H.get_linked_ids TH.Supervisor
@@ -139,10 +149,48 @@ defmodule PopulatorTest do
     end
   end
 
+  test "detect and restart terminated transient/permanent process" do
+    # create child_spec function
+    child_spec = get_child_spec_one_time_worker_fun
+
+    # create supervisor, with some children
+    initial_children_list  = [[name: :w1]]
+
+    {:ok, _} = TH.Supervisor.start_link
+
+    # call Populator.run
+    :ok = Populator.run(TH.Supervisor, child_spec, fn(_) -> initial_children_list end)
+
+    H.wait_for fn ->
+      Supervisor.count_children(TH.Supervisor) |> Dict.fetch!(:workers) == 1
+    end
+
+    [{:w1, pid1, :worker, [Task]}] = Supervisor.which_children(TH.Supervisor)
+
+    H.wait_for fn ->
+      [{:w1, :undefined, :worker, [Task]}] = Supervisor.which_children(TH.Supervisor)
+    end
+
+    # call Populator.run aganin
+    :ok = Populator.run(TH.Supervisor, child_spec, fn(_) -> initial_children_list end)
+
+    H.wait_for fn ->
+      Supervisor.count_children(TH.Supervisor) |> Dict.fetch!(:workers) == 1
+    end
+
+    [{:w1, pid2, :worker, [Task]}] = Supervisor.which_children(TH.Supervisor)
+
+    H.wait_for fn ->
+      [{:w1, :undefined, :worker, [Task]}] = Supervisor.which_children(TH.Supervisor)
+    end
+
+    assert pid1 != :undefined and pid2 != :undefined and pid1 != pid2
+  end
+
   # get child_spec_fun and desired_children_fun for growth test
   defp get_growth_funs do
     # create desired_children function for 5 children
-    desired_children = fn()->
+    desired_children = fn(_opts)->
       [[name: :w1],[name: :w2],[name: :w3],[name: :w4],[name: :w5]]
     end
 
@@ -151,10 +199,19 @@ defmodule PopulatorTest do
 
   # create child_spec function
   defp get_child_spec_fun do
-    fn(data)->
+    fn(data, _opts)->
       Supervisor.Spec.worker(Task,
                              [TH, :lazy_worker, [[ name: data[:name] ]] ],
-                             [id: data[:name]])
+                             [id: data[:name], restart: :temporary])
     end
   end
+
+  defp get_child_spec_one_time_worker_fun do
+    fn(data, _opts)->
+      Supervisor.Spec.worker(Task,
+                             [TH, :one_time_worker, [[ name: data[:name] ]] ],
+                             [id: data[:name], restart: :transient])
+    end
+  end
+
 end
