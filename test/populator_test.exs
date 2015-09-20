@@ -149,6 +149,44 @@ defmodule PopulatorTest do
     end
   end
 
+  test "detect and restart terminated transient/permanent process" do
+    # create child_spec function
+    child_spec = get_child_spec_one_time_worker_fun
+
+    # create supervisor, with some children
+    initial_children_list  = [[name: :w1]]
+
+    {:ok, _} = TH.Supervisor.start_link
+
+    # call Populator.run
+    :ok = Populator.run(TH.Supervisor, child_spec, fn(_) -> initial_children_list end)
+
+    H.wait_for fn ->
+      Supervisor.count_children(TH.Supervisor) |> Dict.fetch!(:workers) == 1
+    end
+
+    [{:w1, pid1, :worker, [Task]}] = Supervisor.which_children(TH.Supervisor)
+
+    H.wait_for fn ->
+      [{:w1, :undefined, :worker, [Task]}] = Supervisor.which_children(TH.Supervisor)
+    end
+
+    # call Populator.run aganin
+    :ok = Populator.run(TH.Supervisor, child_spec, fn(_) -> initial_children_list end)
+
+    H.wait_for fn ->
+      Supervisor.count_children(TH.Supervisor) |> Dict.fetch!(:workers) == 1
+    end
+
+    [{:w1, pid2, :worker, [Task]}] = Supervisor.which_children(TH.Supervisor)
+
+    H.wait_for fn ->
+      [{:w1, :undefined, :worker, [Task]}] = Supervisor.which_children(TH.Supervisor)
+    end
+
+    assert pid1 != :undefined and pid2 != :undefined and pid1 != pid2
+  end
+
   # get child_spec_fun and desired_children_fun for growth test
   defp get_growth_funs do
     # create desired_children function for 5 children
@@ -167,4 +205,13 @@ defmodule PopulatorTest do
                              [id: data[:name], restart: :temporary])
     end
   end
+
+  defp get_child_spec_one_time_worker_fun do
+    fn(data, _opts)->
+      Supervisor.Spec.worker(Task,
+                             [TH, :one_time_worker, [[ name: data[:name] ]] ],
+                             [id: data[:name], restart: :transient])
+    end
+  end
+
 end

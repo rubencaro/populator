@@ -120,21 +120,29 @@ defmodule Populator.Helpers do
     it was already started. `{:error, reason}` otherwise.
   """
   def start_child(spec, supervisor) do
-    # Remove the child spec. We need the child_id
-    child_id = elem(spec, 0)
-    # Ignore the result (it's error the first time)
-    Supervisor.delete_child supervisor, child_id
-
     res = Supervisor.start_child supervisor, spec
+
     case child_is_started_ok(res) do
+      # Something went wrong so return the gotten result
       false -> res
-      child -> {:ok, child}
+
+      # The spec is there but the process isn't so restart it
+      :already_present ->
+        child_id = elem(spec, 0)
+        # IO.puts "+++++++++++ reestart +++++++++++++: #{child_id}"
+        Supervisor.restart_child(supervisor, child_id)
+
+      # There's a running process so it's returned
+      child ->
+        # IO.puts "-----------   start -------------: #{:erlang.pid_to_list(child)}"
+        {:ok, child}
     end
   end
 
   defp child_is_started_ok({:ok,child}), do: child
   defp child_is_started_ok({:ok,child,_}), do: child
   defp child_is_started_ok({:error, {:already_started, child}}), do: child
+  defp child_is_started_ok({:error, :already_present}), do: :already_present
   defp child_is_started_ok(_), do: false
 
   @doc """
