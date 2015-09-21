@@ -101,7 +101,7 @@ defmodule Populator.Helpers do
   end
 
   defp get_name(pid) do
-    Process.info(pid) |> Keyword.get :registered_name, nil
+    (Process.info(pid) || [])|> Keyword.get :registered_name, nil
   end
 
   @doc """
@@ -121,15 +121,26 @@ defmodule Populator.Helpers do
   """
   def start_child(spec, supervisor) do
     res = Supervisor.start_child supervisor, spec
+
     case child_is_started_ok(res) do
+      # Something went wrong so return the gotten result
       false -> res
-      child -> {:ok, child}
+
+      # The spec is there but the process isn't so restart it
+      :already_present ->
+        child_id = elem(spec, 0)
+        Supervisor.restart_child(supervisor, child_id)
+
+      # There's a running process so it's returned
+      child ->
+        {:ok, child}
     end
   end
 
   defp child_is_started_ok({:ok,child}), do: child
   defp child_is_started_ok({:ok,child,_}), do: child
   defp child_is_started_ok({:error, {:already_started, child}}), do: child
+  defp child_is_started_ok({:error, :already_present}), do: :already_present
   defp child_is_started_ok(_), do: false
 
   @doc """

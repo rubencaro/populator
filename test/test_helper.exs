@@ -23,4 +23,9 @@ defmodule Populator.TestHelpers do
     lazy_worker
   end
 
+  def one_time_worker(opts \\ []) do
+    if opts[:name], do: Process.register(self,opts[:name])
+    :timer.sleep(1_000)
+  end
+
 end
