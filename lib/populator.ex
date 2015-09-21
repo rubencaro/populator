@@ -40,6 +40,7 @@ defmodule Populator do
   defp populate(supervisor, child_spec, desired_children, opts) do
     # start all desired children
     desired = desired_children.(opts)
+
     for d <- desired do
       {:ok, _} = child_spec.(d, opts) |> H.start_child(supervisor)
     end

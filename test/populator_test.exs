@@ -187,6 +187,64 @@ defmodule PopulatorTest do
     assert pid1 != :undefined and pid2 != :undefined and pid1 != pid2
   end
 
+  test "state agent must be registed with a given name plus '_agent'" do
+    # place mocks, we are only testing the runner
+    :meck.new(Populator)
+    :meck.expect(Populator, :run, fn(_, _, _, _)-> :ok end)
+
+    {child_spec, desired_children} = get_growth_funs
+
+    {:ok, _} = TH.Supervisor.start_link
+
+    # Args expected by `Populator.run/4`
+    run_args = [Chloe.LiveRailConsumerSupervisor, child_spec, desired_children, [opts: []]]
+
+    # Spawn the loop runner
+    args = [step: 1_000, name: :given_name, run_args: run_args]
+
+    Task.start_link(fn-> Populator.Looper.run(args) end)
+
+    # check everything went as expected
+    H.wait_for fn ->
+      :meck.num_calls(Populator, :run, run_args) > 1
+    end
+
+    assert true == :given_name_agent in :erlang.registered()
+
+  end
+
+  test "no name given, agent must be registed '<P.I.D>_agent' format" do
+    # place mocks, we are only testing the runner
+    :meck.new(Populator)
+    :meck.expect(Populator, :run, fn(_, _, _, _)-> :ok end)
+
+    {child_spec, desired_children} = get_growth_funs
+
+    {:ok, _} = TH.Supervisor.start_link
+
+    # Args expected by `Populator.run/4`
+    run_args = [Chloe.LiveRailConsumerSupervisor, child_spec, desired_children, [opts: []]]
+
+    # Spawn the loop runner
+    args = [step: 1_000, run_args: run_args]
+
+    Task.start_link(fn-> Populator.Looper.run(args) end)
+
+    # check everything went as expected
+    H.wait_for fn ->
+      :meck.num_calls(Populator, :run, run_args) > 1
+    end
+
+    assert 1 == :erlang.registered |>
+      Enum.filter(fn(x) -> (x |> to_string) =~ ~r/<.*\..*\..*>_populator_agent/ end) |>
+      length()
+
+  end
+
+  ##########################################################################
+  # Shring and growth functions
+  ##########################################################################
+
   # get child_spec_fun and desired_children_fun for growth test
   defp get_growth_funs do
     # create desired_children function for 5 children
@@ -202,7 +260,7 @@ defmodule PopulatorTest do
     fn(data, _opts)->
       Supervisor.Spec.worker(Task,
                              [TH, :lazy_worker, [[ name: data[:name] ]] ],
-                             [id: data[:name]])
+                             [id: data[:name], restart: :temporary])
     end
   end
 
