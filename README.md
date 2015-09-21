@@ -37,7 +37,7 @@ The `desired_children` function must return a list of children data, with all th
 
 ```elixir
 # create desired_children function for 5 children
-desired_children = fn()->
+desired_children = fn(_opts)->
   [[name: :w1],[name: :w2],[name: :w3],[name: :w4],[name: :w5]]
 end
 ```
@@ -45,7 +45,7 @@ end
 A more useful case could be to get that list from a database, or from other dynamic resource, like this:
 
 ```elixir
-desired_children = fn()->
+desired_children = fn(_opts)->
   Mongo.db("mydb")
   |> Mongo.Db.collection("workers")
   |> Mongo.Collection.find
@@ -72,7 +72,7 @@ defmodule MyModule do
 end
 
 # the child_spec function
-spec_fun = fn(data)->
+spec_fun = fn(data, _opts)->
              Supervisor.Spec.worker(Task,
                                     [MyModule, :worker_fun, [data]],
                                     [id: data[:name]]) # child id
