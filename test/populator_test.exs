@@ -199,7 +199,7 @@ defmodule PopulatorTest do
     # Args expected by `Populator.run/4`
     run_args = [Chloe.LiveRailConsumerSupervisor, child_spec, desired_children, [opts: []]]
 
-    # Apawn the loop runner
+    # Spawn the loop runner
     args = [step: 1_000, name: :given_name, run_args: run_args]
 
     Task.start_link(fn-> Populator.Looper.run(args) end)
@@ -225,7 +225,7 @@ defmodule PopulatorTest do
     # Args expected by `Populator.run/4`
     run_args = [Chloe.LiveRailConsumerSupervisor, child_spec, desired_children, [opts: []]]
 
-    # Apawn the loop runner
+    # Spawn the loop runner
     args = [step: 1_000, run_args: run_args]
 
     Task.start_link(fn-> Populator.Looper.run(args) end)
