@@ -50,8 +50,7 @@ defmodule Populator do
     supervisor
     |> H.children_names
     |> Enum.filter(&( not(&1 in desired_names) ))
-    |> Enum.map(&( Process.whereis(&1) ))
-    |> Enum.each(&( true = Process.exit(&1, :kill) ))
+    |> Enum.each(fn (x) -> supervisor |> Supervisor.terminate_child(x); supervisor |> Supervisor.delete_child(x) end)
 
     :ok
   end
