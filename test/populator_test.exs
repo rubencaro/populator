@@ -260,7 +260,7 @@ defmodule PopulatorTest do
     fn(data, _opts)->
       Supervisor.Spec.worker(Task,
                              [TH, :lazy_worker, [[ name: data[:name] ]] ],
-                             [id: data[:name], restart: :temporary])
+                             [id: data[:name]])
     end
   end
 
