@@ -19,10 +19,12 @@ The `child_spec` function should end with a call to `Supervisor.Spec.worker/3` o
 
 The `desired_children` function should return a list of children data, with all the state needed by the `child_spec` function for each of them.
 
-We could use `Populator.run/3` directly, just like:
+The last parameter `opts` is an optional keyword list that will be passed to the previous callback functions.
+
+We could use `Populator.run/4` directly, just like:
 
 ```elixir
-:ok = Populator.run(MySupervisor, my_spec_fun, my_desired_fun)
+:ok = Populator.run(MySupervisor, my_spec_fun, my_desired_fun, opts)
 ```
 
 But is much better to use one of `Populator.Receiver.run/1` or `Populator.Looper.run/1`. This way, every given `step` secs, or after receiving some specific message, `Populator` will run the `desired_children` function, and compare that list with the actual children of the given supervisor.
@@ -86,8 +88,8 @@ By now, every child must have a registered name, and it should be also used as t
 One way to use `Populator` is by starting a looper process that checks our supervisor every once in a while. We do this using `Populator.Looper.run/1` like this:
 
 ```elixir
-# args expected by `Populator.run/3`
-run_args = [MySupervisor, my_spec_fun, my_desired_fun]
+# args expected by `Populator.run/4`
+run_args = [MySupervisor, my_spec_fun, my_desired_fun, opts]
 
 # spawn the loop runner, let it loop every 30sec
 args = [step: 30000, name: :my_looper, run_args: run_args]
@@ -107,8 +109,8 @@ worker(Task, [Populator.Looper,:run,[args]])
 Another way to use `Populator` is by starting a receiver process and then sending it a `:populate` message whenever we want it to adapt our supervisor. We can use `Populator.Receiver.run/1` like this:
 
 ```elixir
-# args expected by `Populator.run/3`
-run_args = [MySupervisor, my_spec_fun, my_desired_fun]
+# args expected by `Populator.run/4`
+run_args = [MySupervisor, my_spec_fun, my_desired_fun, opts]
 
 # spawn the receiver process inside a `Task`
 args = [name: :my_receiver, run_args: run_args]
