@@ -26,12 +26,20 @@ defmodule Populator.Looper do
       |> H.defaults(step: 30000, max_loops: -1)
 
     # register the name if asked
-    if args[:name], do: Process.register(self,args[:name])
+    if args[:name] do
+      Process.register(self,args[:name])
+      agent_name = "#{args[:name]}_agent" |> String.to_atom
+    else
+      agent_name = "#{self() |> :erlang.pid_to_list()}_populator_agent" |> String.to_atom
+    end
 
-    do_loop args, args[:max_loops]
+    Agent.start_link(fn -> args end, name: agent_name)
+
+    do_loop(args, args[:max_loops], agent_name)
   end
 
-  defp do_loop(args, left) do
+  defp do_loop(args, left, agent_name) do
+
     # actual run
     :ok = apply(Populator, :run, args[:run_args])
 
@@ -41,7 +49,11 @@ defmodule Populator.Looper do
     else
       # only sleep & loop if any loops left
       :timer.sleep(args[:step])
-      do_loop(args, left - 1)
+
+      # get args from the agent
+      args = Agent.get(agent_name, &(&1))
+
+      do_loop(args, left - 1, agent_name)
     end
   end
 
