@@ -18,10 +18,10 @@ defmodule PopulatorTest do
   test "population growth" do
     # get funs
     {child_spec, desired_children} = get_growth_funs
-    desired_names = desired_children.() |> Enum.map &( &1[:name] )
+    desired_names = desired_children.(desired_conf_id: :dummy) |> Enum.map &( &1[:name] )
 
     # create supervisor, with one random child already
-    {:ok, _} = TH.Supervisor.start_link children: [child_spec.(name: :w2)]
+    {:ok, _} = TH.Supervisor.start_link children: [child_spec.([name: :w2], opts: [])]
 
     # call Populator.run, it should populate with new children
     :ok = Populator.run TH.Supervisor, child_spec, desired_children
@@ -47,14 +47,14 @@ defmodule PopulatorTest do
 
     # create supervisor, with some children
     children = [[name: :w1],[name: :w2],[name: :w3],[name: :w4],[name: :w5]]
-        |> Enum.map(&( child_spec.(&1)))
+        |> Enum.map(&( child_spec.(&1, opts: [])))
     {:ok, _} = TH.Supervisor.start_link children: children
 
     # create desired_children function for 2 children
-    desired_children = fn()->
+    desired_children = fn(_sup_name)->
       [[name: :w3],[name: :w5]]
     end
-    desired_names = desired_children.() |> Enum.map &( &1[:name] )
+    desired_names = desired_children.(desired_conf_id: :dummy) |> Enum.map &( &1[:name] )
 
     # call Populator.run, it should kill some children
     :ok = Populator.run TH.Supervisor, child_spec, desired_children
@@ -79,7 +79,7 @@ defmodule PopulatorTest do
     {child_spec, desired_children} = get_growth_funs
 
     # create supervisor, with one random child already
-    {:ok, _} = TH.Supervisor.start_link children: [child_spec.(name: :w2)]
+    {:ok, _} = TH.Supervisor.start_link children: [child_spec.([name: :w2], opts: [])]
 
     # save linked_ids to ensure they are steady
     linked_ids = H.get_linked_ids TH.Supervisor
@@ -142,7 +142,7 @@ defmodule PopulatorTest do
   # get child_spec_fun and desired_children_fun for growth test
   defp get_growth_funs do
     # create desired_children function for 5 children
-    desired_children = fn()->
+    desired_children = fn(_opts)->
       [[name: :w1],[name: :w2],[name: :w3],[name: :w4],[name: :w5]]
     end
 
@@ -151,7 +151,7 @@ defmodule PopulatorTest do
 
   # create child_spec function
   defp get_child_spec_fun do
-    fn(data)->
+    fn(data, _opts)->
       Supervisor.Spec.worker(Task,
                              [TH, :lazy_worker, [[ name: data[:name] ]] ],
                              [id: data[:name]])
