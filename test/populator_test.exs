@@ -149,7 +149,7 @@ defmodule PopulatorTest do
     end
   end
 
-  test "detect and restart terminated transient/permanent process" do
+  test "detect and restart terminated transient process" do
     # create child_spec function
     child_spec = get_child_spec_one_time_worker_fun
 
@@ -187,7 +187,7 @@ defmodule PopulatorTest do
     assert pid1 != :undefined and pid2 != :undefined and pid1 != pid2
   end
 
-  test "state agent must be registed with a given name plus '_agent'" do
+  test "state agent must be registered with a given name plus '_agent'" do
     # place mocks, we are only testing the runner
     :meck.new(Populator)
     :meck.expect(Populator, :run, fn(_, _, _, _)-> :ok end)
@@ -242,7 +242,7 @@ defmodule PopulatorTest do
   end
 
   ##########################################################################
-  # Shring and growth functions
+  # Shrink and growth functions
   ##########################################################################
 
   # get child_spec_fun and desired_children_fun for growth test

@@ -104,6 +104,15 @@ Usually you may want the looper `Task` to be in your supervision tree, like this
 worker(Task, [Populator.Looper,:run,[args]])
 ```
 
+State can be accessed using an `Agent` registered as `:my_looper_agent`
+(actually `"#{args[:name]}_agent"`).
+
+This can be useful if you need to change any of the given arguments after
+the loop is started. Any changes over that state are used in the next
+iteration of the loooper. Agent updates are atomic, so any update you will
+be fully applied, or no applied at all (i.e. will be applied from the next
+iteration on).
+
 ## `Populator.Receiver`
 
 Another way to use `Populator` is by starting a receiver process and then sending it a `:populate` message whenever we want it to adapt our supervisor. We can use `Populator.Receiver.run/1` like this:
@@ -129,5 +138,20 @@ worker(Task, [Populator.Receiver,:run,[args]])
 ## TODOs
 
 * Get it stable on production (then get to 1.0)
+* Support live accessible state on Receiver too
 * Accept anonymous supervisor
 * Accept anonymous children
+* Stop using `:meck` and use module swapping instead
+
+## Changelog
+
+### 0.4.0
+
+* Add live accessible state for Looper
+* Add options to populator callbacks
+* Add `already_present` support
+* Fix some bugs
+
+### 0.2.0
+
+* Initial release

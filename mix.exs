@@ -3,7 +3,7 @@ defmodule Populator.Mixfile do
 
   def project do
     [app: :populator,
-     version: "0.2.0",
+     version: "0.4.0",
      elixir: "~> 1.0",
      package: package,
      deps: deps,
@@ -15,7 +15,7 @@ defmodule Populator.Mixfile do
   end
 
   defp package do
-    [contributors: ["Rubén Caro"],
+    [contributors: ["Rubén Caro","Juan Miguel Mora"],
      licenses: ["MIT"],
      links: %{github: "https://github.com/rubencaro/populator"}]
   end

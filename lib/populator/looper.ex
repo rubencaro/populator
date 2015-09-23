@@ -20,6 +20,15 @@ defmodule Populator.Looper do
       `:ok` is returned if `:max_loops` reached.
     * `step` is in milliseconds, time to sleep between loops (default 30000)
     * `name` is the name to be registered with (not given means not registered)
+
+    State can be accessed using an `Agent` registered as `:my_looper_agent`
+    (`"\#{args[:name]}_agent"`).
+
+    This can be useful if you need to change any of the given arguments after
+    the loop is started. Any changes over that state are used in the next
+    iteration of the loooper. Agent updates are atomic, so any update you will
+    be fully applied, or no applied at all (i.e. will be applied from the next
+    iteration on).
   """
   def run(args) do
     args = args
