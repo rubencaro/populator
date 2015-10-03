@@ -8,7 +8,7 @@ A library to help control the population of a given supervisor.
 Just add it among your project dependencies on `mix.exs`:
 
 ```elixir
-{:populator, "0.2.0"}
+{:populator, "0.4.0"}
 ```
 
 ## What
