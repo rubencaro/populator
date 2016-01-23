@@ -114,7 +114,7 @@ defmodule PopulatorTest do
     run_args = [:sup, :spec, :desired]
 
     # spawn the loop runner, let it loop 5 times
-    args = [step: 1, max_loops: 5, name: :test_looper, run_args: run_args]
+    args = [step: 1, max_loops: 5, name: :test_looper, run_args: run_args, runner: Populator]
     assert :ok = Populator.Looper.run(args)
 
     # check everything went as expected
@@ -132,7 +132,7 @@ defmodule PopulatorTest do
     run_args = [:sup, :spec, :desired]
 
     # spawn the receiver
-    args = [name: :test_receiver, run_args: run_args]
+    args = [name: :test_receiver, run_args: run_args, runner: Populator]
     Task.async fn-> Populator.Receiver.run(args) end
 
     assert :meck.num_calls(Populator, :run, [run_args]) == 0
@@ -200,7 +200,7 @@ defmodule PopulatorTest do
     run_args = [Chloe.LiveRailConsumerSupervisor, child_spec, desired_children, [opts: []]]
 
     # Spawn the loop runner
-    args = [step: 1_000, name: :given_name, run_args: run_args]
+    args = [step: 1_000, name: :given_name, run_args: run_args, runner: Populator]
 
     Task.start_link(fn-> Populator.Looper.run(args) end)
 
@@ -226,7 +226,7 @@ defmodule PopulatorTest do
     run_args = [Chloe.LiveRailConsumerSupervisor, child_spec, desired_children, [opts: []]]
 
     # Spawn the loop runner
-    args = [step: 1_000, run_args: run_args]
+    args = [step: 1_000, run_args: run_args, runner: Populator]
 
     Task.start_link(fn-> Populator.Looper.run(args) end)
 

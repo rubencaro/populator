@@ -1,3 +1,5 @@
+require Populator.Helpers, as: H
+
 defmodule Populator.Receiver do
 
   @doc """
@@ -23,6 +25,8 @@ defmodule Populator.Receiver do
     * `name` is the name to be registered with (not given means not registered)
   """
   def run(args) do
+    args = args |> H.defaults(runner: Populator)
+
     # register the name if asked
     if args[:name], do: Process.register(self,args[:name])
 
@@ -32,7 +36,7 @@ defmodule Populator.Receiver do
   defp do_receive(args) do
     receive do
       :populate ->
-        :ok = apply(Populator, :run, args[:run_args])
+        :ok = apply(args[:runner], :run, args[:run_args])
         do_receive args
     end
   end

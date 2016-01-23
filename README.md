@@ -145,6 +145,10 @@ worker(Task, [Populator.Receiver,:run,[args]])
 
 ## Changelog
 
+### master
+
+* Remove some warnings on Elixir 1.2.0 
+
 ### 0.4.0
 
 * Add live accessible state for Looper
