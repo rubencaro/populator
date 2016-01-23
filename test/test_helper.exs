@@ -1,5 +1,8 @@
 ExUnit.start()
 
+# save some state
+Agent.start_link(fn -> %{} end, name: :populator_test_agent)
+
 defmodule Populator.TestHelpers.Supervisor do
   use Supervisor
 
@@ -26,6 +29,31 @@ defmodule Populator.TestHelpers do
   def one_time_worker(opts \\ []) do
     if opts[:name], do: Process.register(self,opts[:name])
     :timer.sleep(1_000)
+  end
+
+  def get_count(key) do
+    Agent.get(:populator_test_agent,&(&1)) |> Map.get(key, 0)
+  end
+
+  def unique, do: :erlang.unique_integer([:positive])
+
+end
+
+defmodule Populator.TestHelpers.MockRunner do
+
+  @doc """
+    Accumulates the number of calls to each combination of params
+  """
+  def run(a, b, c, d \\ nil) do
+    # calc the key first
+    key = [a, b, c]
+    if d, do: key = [a, b, c, d]
+
+    Agent.update(:populator_test_agent, fn(s)->
+      Map.update(s, key, 1, &(&1 + 1))
+    end)
+
+    :ok
   end
 
 end

@@ -55,7 +55,7 @@ defmodule Populator.Helpers do
     `:raise` value (default) will raise en exception.
   """
   def wait_for(opts \\ [], func) do
-    opts = [msecs: 5_000, step: 100, timeout: :raise] |> Keyword.merge opts
+    opts = [msecs: 5_000, step: 100, timeout: :raise] |> Keyword.merge(opts)
     res = try do
       func.()
     rescue
@@ -101,7 +101,7 @@ defmodule Populator.Helpers do
   end
 
   defp get_name(pid) do
-    (Process.info(pid) || [])|> Keyword.get :registered_name, nil
+    (Process.info(pid) || [])|> Keyword.get(:registered_name, nil)
   end
 
   @doc """

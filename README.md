@@ -141,13 +141,13 @@ worker(Task, [Populator.Receiver,:run,[args]])
 * Support live accessible state on Receiver too
 * Accept anonymous supervisor
 * Accept anonymous children
-* Stop using `:meck` and use module swapping instead
 
 ## Changelog
 
 ### master
 
-* Remove some warnings on Elixir 1.2.0 
+* Stop using `:meck` and use module swapping instead
+* Remove some warnings on Elixir 1.2.0
 
 ### 0.4.0
 

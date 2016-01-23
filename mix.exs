@@ -3,7 +3,7 @@ defmodule Populator.Mixfile do
 
   def project do
     [app: :populator,
-     version: "0.4.0",
+     version: "0.5.0",
      elixir: "~> 1.0",
      package: package,
      deps: deps,
@@ -11,7 +11,7 @@ defmodule Populator.Mixfile do
   end
 
   defp deps do
-    [ {:meck, "~> 0.8.3", only: [:dev,:test]} ]
+    []
   end
 
   defp package do

@@ -10,7 +10,9 @@ defmodule PopulatorTest do
     if pid, do: true = Process.exit(pid,:kill)
 
     # clean any mock on exit
-    on_exit fn -> :meck.unload end
+    on_exit(fn ->
+      Agent.update(:populator_test_agent, fn(_)-> %{} end)
+    end)
 
     :ok
   end
@@ -106,36 +108,30 @@ defmodule PopulatorTest do
   end
 
   test "loop runner" do
-    # place mocks, we are only testing the runner
-    :meck.new(Populator)
-    :meck.expect(Populator, :run, fn(_, _, _)-> :ok end)
 
     # args expected by Populator.run
     run_args = [:sup, :spec, :desired]
 
     # spawn the loop runner, let it loop 5 times
-    args = [step: 1, max_loops: 5, name: :test_looper, run_args: run_args, runner: Populator]
+    args = [step: 1, max_loops: 5, name: :test_looper, run_args: run_args, runner: TH.MockRunner]
     assert :ok = Populator.Looper.run(args)
 
     # check everything went as expected
     H.wait_for fn ->
-      :meck.num_calls(Populator, :run, run_args) == 5
+      TH.get_count(run_args) == 5
     end
   end
 
   test "message runner" do
-    # place mocks, we are only testing the runner
-    :meck.new(Populator)
-    :meck.expect(Populator, :run, fn(_, _, _)-> :ok end)
 
     # args expected by Populator.run
     run_args = [:sup, :spec, :desired]
 
     # spawn the receiver
-    args = [name: :test_receiver, run_args: run_args, runner: Populator]
+    args = [name: :test_receiver, run_args: run_args, runner: TH.MockRunner]
     Task.async fn-> Populator.Receiver.run(args) end
 
-    assert :meck.num_calls(Populator, :run, [run_args]) == 0
+    assert TH.get_count(run_args) == 0
 
     # wait for the name to be registered
     H.wait_for fn -> Process.whereis(:test_receiver) end
@@ -145,7 +141,7 @@ defmodule PopulatorTest do
 
     # check everything went as expected
     H.wait_for fn ->
-      :meck.num_calls(Populator, :run, run_args) == 1
+      TH.get_count(run_args) == 1
     end
   end
 
@@ -188,9 +184,6 @@ defmodule PopulatorTest do
   end
 
   test "state agent must be registered with a given name plus '_agent'" do
-    # place mocks, we are only testing the runner
-    :meck.new(Populator)
-    :meck.expect(Populator, :run, fn(_, _, _, _)-> :ok end)
 
     {child_spec, desired_children} = get_growth_funs
 
@@ -200,13 +193,13 @@ defmodule PopulatorTest do
     run_args = [Chloe.LiveRailConsumerSupervisor, child_spec, desired_children, [opts: []]]
 
     # Spawn the loop runner
-    args = [step: 1_000, name: :given_name, run_args: run_args, runner: Populator]
+    args = [step: 1_000, name: :given_name, run_args: run_args, runner: TH.MockRunner]
 
     Task.start_link(fn-> Populator.Looper.run(args) end)
 
     # check everything went as expected
     H.wait_for fn ->
-      :meck.num_calls(Populator, :run, run_args) > 1
+      TH.get_count(run_args) > 1
     end
 
     assert true == :given_name_agent in :erlang.registered()
@@ -214,9 +207,6 @@ defmodule PopulatorTest do
   end
 
   test "no name given, agent must be registed '<P.I.D>_agent' format" do
-    # place mocks, we are only testing the runner
-    :meck.new(Populator)
-    :meck.expect(Populator, :run, fn(_, _, _, _)-> :ok end)
 
     {child_spec, desired_children} = get_growth_funs
 
@@ -226,13 +216,13 @@ defmodule PopulatorTest do
     run_args = [Chloe.LiveRailConsumerSupervisor, child_spec, desired_children, [opts: []]]
 
     # Spawn the loop runner
-    args = [step: 1_000, run_args: run_args, runner: Populator]
+    args = [step: 1_000, run_args: run_args, runner: TH.MockRunner]
 
     Task.start_link(fn-> Populator.Looper.run(args) end)
 
     # check everything went as expected
     H.wait_for fn ->
-      :meck.num_calls(Populator, :run, run_args) > 1
+      TH.get_count(run_args) > 1
     end
 
     assert 1 == :erlang.registered |>
