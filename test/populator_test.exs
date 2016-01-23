@@ -18,7 +18,7 @@ defmodule PopulatorTest do
   test "population growth" do
     # get funs
     {child_spec, desired_children} = get_growth_funs
-    desired_names = desired_children.(desired_conf_id: :dummy) |> Enum.map &( &1[:name] )
+    desired_names = desired_children.(desired_conf_id: :dummy) |> Enum.map(&( &1[:name] ))
 
     # create supervisor, with one random child already
     {:ok, _} = TH.Supervisor.start_link children: [child_spec.([name: :w2], opts: [])]
@@ -48,7 +48,7 @@ defmodule PopulatorTest do
     # create supervisor, with some children
     initial_children_list  = [[name: :w1],[name: :w2],[name: :w3],[name: :w4],[name: :w5]]
     initial_children_spec  = initial_children_list |> Enum.map(&( child_spec.(&1, opts: [])))
-    initial_children_names = initial_children_list |> Enum.map &( &1[:name] )
+    initial_children_names = initial_children_list |> Enum.map(&( &1[:name] ))
     {:ok, _} = TH.Supervisor.start_link children: initial_children_spec
 
     # check supervisor has the 5 children
@@ -62,7 +62,7 @@ defmodule PopulatorTest do
     desired_children = fn(_sup_name)->
       [[name: :w3],[name: :w5]]
     end
-    desired_names = desired_children.(desired_conf_id: :dummy) |> Enum.map &( &1[:name] )
+    desired_names = desired_children.(desired_conf_id: :dummy) |> Enum.map(&( &1[:name] ))
 
     # call Populator.run, it should kill some children
     :ok = Populator.run TH.Supervisor, child_spec, desired_children
