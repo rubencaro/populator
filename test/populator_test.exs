@@ -183,7 +183,7 @@ defmodule PopulatorTest do
     assert pid1 != :undefined and pid2 != :undefined and pid1 != pid2
   end
 
-  test "state agent must be registered with a given name plus '_agent'" do
+  test "state agent must be registered with a given name plus '.Agent'" do
 
     {child_spec, desired_children} = get_growth_funs
 
@@ -202,11 +202,11 @@ defmodule PopulatorTest do
       TH.get_count(run_args) > 1
     end
 
-    assert true == :given_name_agent in :erlang.registered()
+    assert true == :'given_name.Agent' in :erlang.registered()
 
   end
 
-  test "no name given, agent must be registed '<P.I.D>_agent' format" do
+  test "no name given, agent must be registed '<P.I.D>_Populator.Agent' format" do
 
     {child_spec, desired_children} = get_growth_funs
 
@@ -226,7 +226,7 @@ defmodule PopulatorTest do
     end
 
     assert 1 == :erlang.registered |>
-      Enum.filter(fn(x) -> (x |> to_string) =~ ~r/<.*\..*\..*>_populator_agent/ end) |>
+      Enum.filter(fn(x) -> (x |> to_string) =~ ~r/<.*\..*\..*>_Populator.Agent/ end) |>
       length()
 
   end
