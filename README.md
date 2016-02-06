@@ -35,7 +35,7 @@ Every children should have a registered unique name, so that `Populator` can ide
 
 ## `desired_children` function
 
-The `desired_children` function must return a list of children data, with all the state needed by the `child_spec` function for each of them. For example:
+The `desired_children` function must return a list of children data, with all the state needed by the `child_spec` function for each of them. They must contain at least a `name` which will be used to identify the associated process, thus it must be a valid process name. For example:
 
 ```elixir
 # create desired_children function for 5 children
@@ -51,6 +51,7 @@ desired_children = fn(_opts)->
   Mongo.db("mydb")
   |> Mongo.Db.collection("workers")
   |> Mongo.Collection.find
+  |> MyTools.add_children_name
   |> Enum.to_list
 end
 ```
