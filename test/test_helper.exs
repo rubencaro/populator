@@ -46,8 +46,7 @@ defmodule Populator.TestHelpers.MockRunner do
   """
   def run(a, b, c, d \\ nil) do
     # calc the key first
-    key = [a, b, c]
-    if d, do: key = [a, b, c, d]
+    key = if d, do: [a, b, c, d], else: [a, b, c]
 
     Agent.update(:populator_test_agent, fn(s)->
       Map.update(s, key, 1, &(&1 + 1))
