@@ -19,7 +19,7 @@ defmodule PopulatorTest do
 
   test "population growth" do
     # get funs
-    {child_spec, desired_children} = get_growth_funs
+    {child_spec, desired_children} = get_growth_funs()
     desired_names = desired_children.(desired_conf_id: :dummy) |> Enum.map(&( &1[:name] ))
 
     # create supervisor, with one random child already
@@ -45,7 +45,7 @@ defmodule PopulatorTest do
 
   test "population shrink" do
     # create child_spec function
-    child_spec = get_child_spec_fun
+    child_spec = get_child_spec_fun()
 
     # create supervisor, with some children
     initial_children_list  = [[name: :w1],[name: :w2],[name: :w3],[name: :w4],[name: :w5]]
@@ -88,7 +88,7 @@ defmodule PopulatorTest do
 
   test "stationary population" do
     # get funs for growing population
-    {child_spec, desired_children} = get_growth_funs
+    {child_spec, desired_children} = get_growth_funs()
 
     # create supervisor, with one random child already
     {:ok, _} = TH.Supervisor.start_link children: [child_spec.([name: :w2], opts: [])]
@@ -147,7 +147,7 @@ defmodule PopulatorTest do
 
   test "detect and restart terminated transient process" do
     # create child_spec function
-    child_spec = get_child_spec_one_time_worker_fun
+    child_spec = get_child_spec_one_time_worker_fun()
 
     # create supervisor, with some children
     initial_children_list  = [[name: :w1]]
@@ -158,7 +158,7 @@ defmodule PopulatorTest do
     :ok = Populator.run(TH.Supervisor, child_spec, fn(_) -> initial_children_list end)
 
     H.wait_for fn ->
-      Supervisor.count_children(TH.Supervisor) |> Dict.fetch!(:workers) == 1
+      Supervisor.count_children(TH.Supervisor) |> Map.get(:workers) == 1
     end
 
     [{:w1, pid1, :worker, [Task]}] = Supervisor.which_children(TH.Supervisor)
@@ -171,7 +171,7 @@ defmodule PopulatorTest do
     :ok = Populator.run(TH.Supervisor, child_spec, fn(_) -> initial_children_list end)
 
     H.wait_for fn ->
-      Supervisor.count_children(TH.Supervisor) |> Dict.fetch!(:workers) == 1
+      Supervisor.count_children(TH.Supervisor) |> Map.get(:workers) == 1
     end
 
     [{:w1, pid2, :worker, [Task]}] = Supervisor.which_children(TH.Supervisor)
@@ -185,7 +185,7 @@ defmodule PopulatorTest do
 
   test "state agent must be registered with a given name plus '.Agent'" do
 
-    {child_spec, desired_children} = get_growth_funs
+    {child_spec, desired_children} = get_growth_funs()
 
     {:ok, _} = TH.Supervisor.start_link
 
@@ -208,7 +208,7 @@ defmodule PopulatorTest do
 
   test "no name given, agent must be registed '<P.I.D>_Populator.Agent' format" do
 
-    {child_spec, desired_children} = get_growth_funs
+    {child_spec, desired_children} = get_growth_funs()
 
     {:ok, _} = TH.Supervisor.start_link
 
@@ -242,7 +242,7 @@ defmodule PopulatorTest do
       [[name: :w1],[name: :w2],[name: :w3],[name: :w4],[name: :w5]]
     end
 
-    {get_child_spec_fun, desired_children}
+    {get_child_spec_fun(), desired_children}
   end
 
   # create child_spec function

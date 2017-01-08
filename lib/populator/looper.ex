@@ -37,7 +37,7 @@ defmodule Populator.Looper do
     # register the name if asked
     agent_name =
       if args[:name] do
-        Process.register(self,args[:name])
+        Process.register(self(), args[:name])
         "#{args[:name]}.Agent" |> String.to_atom
       else
         "#{self() |> :erlang.pid_to_list()}_Populator.Agent" |> String.to_atom

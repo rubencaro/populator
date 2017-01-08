@@ -28,7 +28,7 @@ defmodule Populator.Receiver do
     args = args |> H.defaults(runner: Populator)
 
     # register the name if asked
-    if args[:name], do: Process.register(self,args[:name])
+    if args[:name], do: Process.register(self(),args[:name])
 
     do_receive args
   end

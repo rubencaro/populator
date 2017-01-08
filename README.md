@@ -2,13 +2,14 @@
 
 [![Build Status](https://travis-ci.org/rubencaro/populator.svg?branch=master)](https://travis-ci.org/rubencaro/populator)
 [![Hex Version](http://img.shields.io/hexpm/v/populator.svg?style=flat)](https://hex.pm/packages/populator)
+[![Hex Version](http://img.shields.io/hexpm/dt/populator.svg?style=flat)](https://hex.pm/packages/populator)
 
 A library to help control the population of a given supervisor.
 
 Just add it among your project dependencies on `mix.exs`:
 
 ```elixir
-{:populator, "0.4.0"}
+{:populator, ">= 0.5.0"}
 ```
 
 ## What
@@ -147,6 +148,9 @@ worker(Task, [Populator.Receiver,:run,[args]])
 
 ### master
 
+### 0.5.0
+
+* Remove Elixir 1.4.0 warnings
 * Stop using `:meck` and use module swapping instead
 * Remove some warnings on Elixir 1.2.0
 

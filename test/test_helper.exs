@@ -21,13 +21,13 @@ end
 defmodule Populator.TestHelpers do
 
   def lazy_worker(opts \\ []) do
-    if opts[:name], do: Process.register(self,opts[:name])
+    if opts[:name], do: Process.register(self(),opts[:name])
     :timer.sleep(50)
-    lazy_worker
+    lazy_worker()
   end
 
   def one_time_worker(opts \\ []) do
-    if opts[:name], do: Process.register(self,opts[:name])
+    if opts[:name], do: Process.register(self(),opts[:name])
     :timer.sleep(1_000)
   end
 
