@@ -139,6 +139,7 @@ worker(Task, [Populator.Receiver,:run,[args]])
 
 ## TODOs
 
+* Use the [Registry](https://hexdocs.pm/elixir/Registry.html#content)
 * Get it stable on production (then get to 1.0)
 * Support live accessible state on Receiver too
 * Accept anonymous supervisor
