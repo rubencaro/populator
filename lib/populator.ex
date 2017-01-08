@@ -53,8 +53,11 @@ defmodule Populator do
 
     supervisor
     |> H.children_names
-    |> Enum.filter(&(not(&1 in desired_names)))
-    |> Enum.each(fn (x) -> supervisor |> Supervisor.terminate_child(x); supervisor |> Supervisor.delete_child(x) end)
+    |> Enum.reject(&(&1 in desired_names))
+    |> Enum.each(fn(x) ->
+      Supervisor.terminate_child(supervisor, x)
+      Supervisor.delete_child(supervisor, x)
+    end)
 
     :ok
   end
