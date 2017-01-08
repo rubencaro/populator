@@ -1,6 +1,9 @@
 require Populator.Helpers, as: H
 
 defmodule Populator do
+  @moduledoc """
+  Main Populator module
+  """
 
   @doc """
     It will update the given supervisor until it has the population demanded by
@@ -42,15 +45,15 @@ defmodule Populator do
     desired = desired_children.(opts)
 
     for d <- desired do
-      {:ok, _} = child_spec.(d, opts) |> H.start_child(supervisor)
+      {:ok, _} = H.start_child(child_spec.(d, opts), supervisor)
     end
 
     # kill non desired ones
-    desired_names = desired |> Enum.map(&( &1[:name] )) |> Enum.sort
+    desired_names = desired |> Enum.map(&(&1[:name])) |> Enum.sort
 
     supervisor
     |> H.children_names
-    |> Enum.filter(&( not(&1 in desired_names) ))
+    |> Enum.filter(&(not(&1 in desired_names)))
     |> Enum.each(fn (x) -> supervisor |> Supervisor.terminate_child(x); supervisor |> Supervisor.delete_child(x) end)
 
     :ok

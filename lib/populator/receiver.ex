@@ -1,6 +1,9 @@
 require Populator.Helpers, as: H
 
 defmodule Populator.Receiver do
+  @moduledoc """
+  Main Receiver code module
+  """
 
   @doc """
     Start a `receive` block to listen to `:populate` message.

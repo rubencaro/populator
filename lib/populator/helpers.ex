@@ -19,8 +19,8 @@ defmodule Populator.Helpers do
     quote do
       %{file: file, line: line} = __ENV__
       name = Process.info(self)[:registered_name]
-      chain = [ :bright, :red, "\n\n#{file}:#{line}",
-                :normal, "\n     #{inspect self}", :green," #{name}"]
+      chain = [:bright, :red, "\n\n#{file}:#{line}",
+               :normal, "\n     #{inspect self}", :green," #{name}"]
 
       msg = inspect(unquote(obj),unquote(inspect_opts))
       if String.length(msg) > 2, do: chain = chain ++ [:red, "\n\n#{msg}"]
@@ -39,7 +39,7 @@ defmodule Populator.Helpers do
   defmacro todo(msg \\ "") do
     quote do
       %{file: file, line: line} = __ENV__
-      [ :yellow, "\nTODO: #{file}:#{line} #{unquote(msg)}\n", :reset]
+      [:yellow, "\nTODO: #{file}:#{line} #{unquote(msg)}\n", :reset]
       |> IO.ANSI.format(true)
       |> IO.puts
       :todo
@@ -87,8 +87,8 @@ defmodule Populator.Helpers do
   def children_names(supervisor) do
     supervisor
       |> get_linked_ids
-      |> Enum.map( &( get_name(&1) ) )
-      |> Enum.filter( &(&1) ) # remove nils
+      |> Enum.map(&(get_name(&1)))
+      |> Enum.filter(&(&1)) # remove nils
       |> Enum.sort
   end
 
@@ -101,7 +101,8 @@ defmodule Populator.Helpers do
   end
 
   defp get_name(pid) do
-    (Process.info(pid) || [])|> Keyword.get(:registered_name, nil)
+    info = Process.info(pid) || []
+    info |> Keyword.get(:registered_name, nil)
   end
 
   @doc """

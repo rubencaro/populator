@@ -1,6 +1,9 @@
 require Populator.Helpers, as: H
 
 defmodule Populator.Looper do
+  @moduledoc """
+  Main Looper code module
+  """
 
   @doc """
     Start a looper that runs `Populator.run/3` on every loop. Example:
@@ -32,7 +35,7 @@ defmodule Populator.Looper do
   """
   def run(args) do
     args = args
-      |> H.defaults(step: 30000, max_loops: -1, runner: Populator)
+      |> H.defaults(step: 30_000, max_loops: -1, runner: Populator)
 
     # register the name if asked
     agent_name =
